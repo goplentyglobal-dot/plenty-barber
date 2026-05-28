@@ -1,0 +1,62 @@
+PLENTY BARBER DEBE TENER UN "FRAME" MUCHO MAS AMIGABLE, PORQUE POR EJEMPLO NO HAY FOTO DE PERFIL PARA LOS USUARIOS, ESTILO GOOGLE, EL PANEL DE LA IZQUIERDA ES MUY RUSTICO, QUISIERA ALGO MUCHO MAS ELEGANTE, BOTONES REDONDEADOS, ICONOS ACOMPAÑANDO ARMONIOSAMENTE LA INTERACCION Y EL SCROLL, MUCHA MAS ELEGANCIA AL DASHBOARD SIN SALIRNOS DE LOS PARAMETROS DE LA MARCA
+
+
+No entendí esto que me recomendó para evitar que se me acaben los tokens y programar mas tiempo sin perder la concentración
+
+Usa herramientas de ahorro: Si integras tu entorno con herramientas o enrutadores compatibles como el Inworld Router u OpenRouter, puedes activar opciones de Prompt Caching (guardado en caché). Esto reduce el costo de la entrada a solo $0.50 por millón de tokens si repites consultas sobre el mismo archivo de código, haciendo que tus créditos duren hasta 10 veces más.
+
+
+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
+
+-------------------------------------------------------------------------------------------------------------------
+2. 
+- Cuando se guarde la información al presionar un botón quiero que hayan animaciones que le confirmen a la persona que se cerro la tarea. Quiero mas de esas pequeñas animaciones que nos dan una experiencia de usuario inmersiva y bacana
+
+
+- No me había dado cuenta que todo el dashboard cuando ingresas con usuario y contraseña, todo está en Ingles, corrijamos eso para el respeto de idiomas también, incluso quiero que se le pueda cambiar el idioma desde dentro del dashboard en cualquier pantalla.
+
+- Le subi 4 fotos en vez de una y saco este error
+
+1 of 1 error
+Next.js (14.2.35) is outdated (learn more)
+
+Unhandled Runtime Error
+Error: Upload a maximum of 3 photos.
+
+Source
+app\dashboard\reports\new\actions.ts (157:11) @ validatePhotos
+
+  155 |
+  156 |   if (photos.length > 3) {
+> 157 |     throw new Error("Upload a maximum of 3 photos.");
+      |           ^
+  158 |   }
+  159 |
+  160 |   for (const photo of photos) {
+Call Stack
+Show collapsed frames
+
+- Me gusatria que los botones de iniciar sesión, panel, unirse, y precios sean mas redondos y destaquen, y el único con relleno dorado debe ser el de Ingresar (en vez de "unirse")
+
+El hero debe ser mas impactante, ahí voy a añadir una foto completa de la parte inicial de un informe completo como si fuera un screen shot de el hero que lo recibe a uno Facebook, generemos la imagen y que cada titulo de Facebook sea cambiado por la descripción del informe adaptado. 
+
+Y el único botón va a ser INICIAR SESION y "LO QUIERO para mi negocio" para que la letra queda sin problemas en los dos botones
+
+EN LA SECCION DE PRECIOS QUIERO QUE PONGAS EL PRECIO PREDETERMINADO COMO LOS PRECIOS EN DOLARES, PERO QUE HAYA UN SELECTOR TIPO ON OFF DE DESLIZAMIENTO QUE PASE ENTRE PAISES (BANDERA DE COL >>> valor) BANDERA DE BRAZIL y PORTUGAL JUNTOS >>>VALOR EN REALES (dólar multiplicado por 4 para aguantar las fluctuaciones) BANDERA DE USA (usd que es el principal)
+
+y que hagamos mucho mas atractiva esta sección, hover para las tarjetas, efecto de flotar suavemente y etc.. que no se sientan espantados hasta que realicen el pago. la accion de pagar se sienta super smooth y agradable
+
+ 
+Falta conectar la pasarela de pagos para COLOMBIA Y STRIPE para las de afuera, HAy que mirar en Brazil cual es la mas usada y habilitarla también. Por ejemplo en Colombia es PSE pero también existe BOLD que es super fácil de implementar con un link de pago (se puede pagar por nequi, muchos bancos y hasta con tarjeta de credito, qr y link fijos con precios fijos  y  tambien es muy prestigiosa
+
+Cuando inicio desde la opción PRICING EL BOTON INICIAR SESION NO DEBE ESTAR PORQUE PUEDE DISTRAER AL LEAD DEL PAGO. O DE RECARGAR SI ES USUARIO MENSUAL 
+TODA ESA PAGINA DE PRICING DEBE QUERER LLEVAR AL LEAD A LA COMPRA SIN CONVENCER Y SIN PRESIONAR, PURA INFORMACION HONESTA EN UN TONO SUPER AGRADABLE
+
+
+
+
+------------------------------------------------------------------------------------------------------------
+3. 
+Se deben crear 3 frames (el de barbero, es decir el actual, uno para Spa´s y recomiendame cual otro que se pueda implementar fácilmente pero que contenga las mismas características simplemente adaptado para el nicho, de modo que los Spa, por ejemplo no tengan que lidiar un frame que dice "Barberia"
+
+
