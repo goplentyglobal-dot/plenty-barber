@@ -1,3 +1,9 @@
+-- Idempotency guard for payment crediting: at most one credit transaction per
+-- external payment reference. Partial so non-payment rows (null reference) are unconstrained.
+create unique index if not exists credit_transactions_payment_ref_key
+  on credit_transactions (stripe_payment_intent_id)
+  where stripe_payment_intent_id is not null;
+
 create or replace function create_generation_with_credit(
   p_business_id uuid,
   p_end_client_id uuid,
@@ -8,7 +14,9 @@ create or replace function create_generation_with_credit(
   p_ai_model text default 'development-placeholder',
   p_input_tokens integer default 0,
   p_output_tokens integer default 0,
-  p_cost_usd numeric default 0
+  p_cost_usd numeric default 0,
+  p_image_provider text default null,
+  p_illustration_urls text[] default array[]::text[]
 )
 returns uuid
 language plpgsql
@@ -63,11 +71,11 @@ begin
     p_photo_urls,
     p_ai_provider,
     p_ai_model,
-    p_ai_provider,
+    coalesce(p_image_provider, p_ai_provider),
     p_input_tokens + p_output_tokens,
     p_cost_usd,
     p_report_json,
-    array[]::text[],
+    coalesce(p_illustration_urls, array[]::text[]),
     'done'
   )
   returning id into v_generation_id;
@@ -109,5 +117,65 @@ begin
   );
 
   return v_generation_id;
+end;
+$$;
+
+-- Atomically and idempotently apply credits from an approved payment webhook.
+-- Returns true when credits were applied, false when the reference was already
+-- processed (duplicate webhook delivery). Runs with service-role context, so it
+-- does not depend on auth.uid().
+create or replace function apply_payment_credits(
+  p_business_id uuid,
+  p_credits_to_add integer,
+  p_reference text,
+  p_provider text,
+  p_price_usd numeric default null
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_inserted_id uuid;
+begin
+  if p_business_id is null
+    or p_credits_to_add is null
+    or p_credits_to_add <= 0
+    or p_reference is null
+    or p_reference = '' then
+    raise exception 'invalid payment input';
+  end if;
+
+  insert into credit_transactions (
+    business_id,
+    credits_delta,
+    price_usd,
+    stripe_payment_intent_id,
+    type,
+    note
+  )
+  values (
+    p_business_id,
+    p_credits_to_add,
+    p_price_usd,
+    p_reference,
+    'payment_' || p_provider,
+    'Approved ' || p_provider || ' payment'
+  )
+  on conflict (stripe_payment_intent_id) where stripe_payment_intent_id is not null
+  do nothing
+  returning id into v_inserted_id;
+
+  -- Duplicate delivery: the reference already produced a transaction.
+  if v_inserted_id is null then
+    return false;
+  end if;
+
+  update businesses
+  set credits_remaining = credits_remaining + p_credits_to_add
+  where id = p_business_id;
+
+  return true;
 end;
 $$;

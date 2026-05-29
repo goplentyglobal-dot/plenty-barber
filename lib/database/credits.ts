@@ -60,47 +60,20 @@ export async function applyApprovedPaymentCredits(input: {
   }
 
   const supabase = createSupabaseAdminClient();
-  const { data: existing } = await supabase
-    .from("credit_transactions")
-    .select("id")
-    .eq("stripe_payment_intent_id", input.reference)
-    .maybeSingle();
-
-  if (existing) {
-    return { applied: false, reason: "duplicate" as const };
-  }
-
-  const { data: business, error: businessError } = await supabase
-    .from("businesses")
-    .select("credits_remaining")
-    .eq("id", input.businessId)
-    .single();
-
-  if (businessError || !business) {
-    throw new Error("Unable to load business for credit update.");
-  }
-
-  const nextCredits = Number(business.credits_remaining ?? 0) + input.creditsToAdd;
-  const { error: updateError } = await supabase
-    .from("businesses")
-    .update({ credits_remaining: nextCredits })
-    .eq("id", input.businessId);
-
-  if (updateError) {
-    throw new Error("Unable to update business credits.");
-  }
-
-  const { error: transactionError } = await supabase.from("credit_transactions").insert({
-    business_id: input.businessId,
-    credits_delta: input.creditsToAdd,
-    price_usd: input.priceUsd,
-    stripe_payment_intent_id: input.reference,
-    type: `payment_${input.provider}`,
-    note: `Approved ${input.provider} payment`
+  const { data, error } = await supabase.rpc("apply_payment_credits", {
+    p_business_id: input.businessId,
+    p_credits_to_add: input.creditsToAdd,
+    p_reference: input.reference,
+    p_provider: input.provider,
+    p_price_usd: input.priceUsd
   });
 
-  if (transactionError) {
-    throw new Error("Unable to record credit transaction.");
+  if (error) {
+    throw new Error("Unable to apply payment credits.");
+  }
+
+  if (data === false) {
+    return { applied: false, reason: "duplicate" as const };
   }
 
   return { applied: true, reason: "approved" as const };

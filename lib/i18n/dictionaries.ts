@@ -43,6 +43,28 @@ export const dictionaries = {
           title: "Construido para confianza",
           text: "Claves server-side, almacenamiento privado y arquitectura por roles."
         }
+      ],
+      faqTitle: "Preguntas frecuentes",
+      faqEyebrow: "Dudas comunes",
+      faq: [
+        {
+          question: "Como funciona el modelo de creditos?",
+          answer:
+            "Cada informe de visagismo consume un credito. Compras paquetes de creditos sin contratos ni mensualidades y los usas cuando los necesites."
+        },
+        {
+          question: "Que fotos necesito subir?",
+          answer:
+            "De 1 a 3 fotos claras del rostro en JPG, PNG o WebP. A mejor iluminacion y encuadre frontal, mejor el analisis."
+        },
+        {
+          question: "En que idiomas se entregan los informes?",
+          answer: "Los informes y la interfaz estan disponibles en espanol, ingles y portugues."
+        },
+        {
+          question: "Como recibe el cliente su informe?",
+          answer: "Puedes compartir un link web de marca, descargar el PDF o enviarlo directo por WhatsApp."
+        }
       ]
     },
     login: {
@@ -76,7 +98,8 @@ export const dictionaries = {
       loading: "Creando cuenta...",
       separator: "o",
       google: "Continuar con Google",
-      already: "Ya tengo una cuenta"
+      already: "Ya tengo una cuenta",
+      terms: "Acepto los Términos y Condiciones y la Política de Privacidad."
     },
     onboarding: {
       title: "Completa tu espacio",
@@ -130,6 +153,28 @@ export const dictionaries = {
         { title: "Premium experience", text: "Give clients something concrete, elegant and easy to understand." },
         { title: "Branded reports", text: "Every result is prepared for PDF delivery and business branding." },
         { title: "Built for trust", text: "Server-side keys, private storage patterns and role-based architecture." }
+      ],
+      faqTitle: "Frequently asked questions",
+      faqEyebrow: "Common questions",
+      faq: [
+        {
+          question: "How does the credit model work?",
+          answer:
+            "Each visagism report consumes one credit. You buy credit packs with no contracts or monthly fees and use them whenever you need."
+        },
+        {
+          question: "What photos do I need to upload?",
+          answer:
+            "From 1 to 3 clear face photos in JPG, PNG or WebP. Better lighting and a frontal framing produce a better analysis."
+        },
+        {
+          question: "In which languages are reports delivered?",
+          answer: "Reports and the interface are available in Spanish, English and Portuguese."
+        },
+        {
+          question: "How does the client receive the report?",
+          answer: "You can share a branded web link, download the PDF or send it directly over WhatsApp."
+        }
       ]
     },
     login: {
@@ -163,7 +208,8 @@ export const dictionaries = {
       loading: "Creating account...",
       separator: "or",
       google: "Continue with Google",
-      already: "I already have an account"
+      already: "I already have an account",
+      terms: "I accept the Terms & Conditions and the Privacy Policy."
     },
     onboarding: {
       title: "Complete your workspace",
@@ -217,6 +263,28 @@ export const dictionaries = {
         { title: "Experiencia premium", text: "Entregue algo concreto, elegante e facil de entender." },
         { title: "Relatorios de marca", text: "Cada resultado fica pronto para PDF e branding do negocio." },
         { title: "Criado para confianca", text: "Chaves server-side, armazenamento privado e arquitetura por funcoes." }
+      ],
+      faqTitle: "Perguntas frequentes",
+      faqEyebrow: "Duvidas comuns",
+      faq: [
+        {
+          question: "Como funciona o modelo de creditos?",
+          answer:
+            "Cada relatorio de visagismo consome um credito. Voce compra pacotes de creditos sem contratos ou mensalidades e usa quando precisar."
+        },
+        {
+          question: "Quais fotos preciso enviar?",
+          answer:
+            "De 1 a 3 fotos nitidas do rosto em JPG, PNG ou WebP. Melhor iluminacao e enquadramento frontal geram uma analise melhor."
+        },
+        {
+          question: "Em quais idiomas os relatorios sao entregues?",
+          answer: "Os relatorios e a interface estao disponiveis em espanhol, ingles e portugues."
+        },
+        {
+          question: "Como o cliente recebe o relatorio?",
+          answer: "Voce pode compartilhar um link web de marca, baixar o PDF ou enviar direto pelo WhatsApp."
+        }
       ]
     },
     login: {
@@ -250,7 +318,8 @@ export const dictionaries = {
       loading: "Criando conta...",
       separator: "ou",
       google: "Continuar com Google",
-      already: "Ja tenho uma conta"
+      already: "Ja tenho uma conta",
+      terms: "Aceito os Termos e Condições e a Política de Privacidade."
     },
     onboarding: {
       title: "Complete seu espaco",

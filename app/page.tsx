@@ -4,6 +4,8 @@ import { ArrowRight, CheckCircle2, Crown, FileText, ShieldCheck, Sparkles } from
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { AnimatedText } from "@/components/ui/animated-text";
+import { Faq } from "@/components/ui/faq";
 import { getDictionary } from "@/lib/i18n/server";
 
 export default function HomePage() {
@@ -31,9 +33,11 @@ export default function HomePage() {
               <Crown className="h-4 w-4" />
               {landing.badge}
             </p>
-            <h1 className="font-display text-5xl leading-tight text-cream md:text-7xl">
-              Plenty Barber
-            </h1>
+            <AnimatedText
+              text="Plenty Barber"
+              textClassName="text-5xl md:text-7xl"
+              aria-label="Plenty Barber"
+            />
             <p className="mt-6 max-w-xl text-lg leading-8 text-cream/78">
               {landing.subtitle}
             </p>
@@ -96,6 +100,14 @@ export default function HomePage() {
           <h3 className="mt-5 font-display text-2xl">{landing.cards[2].title}</h3>
           <p className="mt-3 text-sm leading-6 text-cream/62">{landing.cards[2].text}</p>
         </Card>
+      </section>
+
+      <section className="border-t border-white/10 bg-noir-soft/40 py-16">
+        <div className="mx-auto max-w-3xl px-5">
+          <p className="text-sm uppercase text-gold-light">{landing.faqEyebrow}</p>
+          <h2 className="mt-3 font-display text-4xl text-cream">{landing.faqTitle}</h2>
+          <Faq items={landing.faq} className="mt-8" />
+        </div>
       </section>
     </main>
   );

@@ -2,11 +2,24 @@ import { NextResponse } from "next/server";
 import { applyApprovedPaymentCredits } from "@/lib/database/credits";
 import { parsePaymentWebhook } from "@/lib/payments/payment-provider";
 import { verifyPaymentWebhook } from "@/lib/payments/webhook-security";
+import { clientIdentifier, rateLimit } from "@/lib/security/rate-limit";
 import type { PaymentProviderName } from "@/lib/payments/types";
 
 export async function POST(request: Request, { params }: { params: { provider: PaymentProviderName } }) {
   if (!isPaymentProvider(params.provider)) {
     return NextResponse.json({ error: "Unsupported payment provider." }, { status: 404 });
+  }
+
+  const limit = rateLimit(`webhook:${params.provider}:${clientIdentifier(request.headers)}`, {
+    limit: 60,
+    windowMs: 60_000
+  });
+
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+    );
   }
 
   const rawBody = await request.text();
@@ -16,7 +29,7 @@ export async function POST(request: Request, { params }: { params: { provider: P
     return NextResponse.json({ error: "Invalid webhook body." }, { status: 400 });
   }
 
-  if (!verifyPaymentWebhook({ provider: params.provider, rawBody, payload: raw, headers: request.headers })) {
+  if (!verifyPaymentWebhook({ provider: params.provider, rawBody, payload: raw, headers: request.headers, url: request.url })) {
     return NextResponse.json({ error: "Invalid webhook signature." }, { status: 401 });
   }
 

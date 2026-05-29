@@ -8,7 +8,7 @@ import { generateStyleIllustrations } from "@/lib/ai/illustrations/generate";
 import { getBusinessById } from "@/lib/database/businesses";
 import { getLocale } from "@/lib/i18n/server";
 import { uploadClientPhoto, uploadReportIllustrations } from "@/lib/storage/report-assets";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { hasSupabasePublicEnv } from "@/lib/validations/env";
 
 const reportFormSchema = z.object({
@@ -76,21 +76,7 @@ async function createReportResult(formData: FormData): Promise<CreateReportResul
       return { ok: true, redirectTo: "/dashboard/credits?error=not_enough_credits" };
     }
 
-    const photoDataUrls = await Promise.all(photos.map(fileToDataUrl));
-    const imageDataUrl = photoDataUrls[0];
-    const analysis = await analyzeFace({ imageDataUrl, locale });
-    const illustrations = await generateStyleIllustrations({
-      report: analysis.report,
-      locale,
-      referenceImageUrls: photoDataUrls
-    });
-
-    const [photoUrls, illustrationUrls] = await Promise.all([
-      Promise.all(photos.map((file, index) => uploadClientPhoto({ businessId: businessUser.business_id, file, index }))),
-      uploadReportIllustrations({ businessId: businessUser.business_id, urls: illustrations.urls })
-    ]);
-
-    const supabase = createSupabaseAdminClient();
+    const supabase = createSupabaseServerClient();
     let clientId = parsed.data.client_id || null;
 
     if (!clientId) {
@@ -110,62 +96,64 @@ async function createReportResult(formData: FormData): Promise<CreateReportResul
         .single();
 
       if (clientError || !client) {
+        console.error("createReport: end_clients insert failed", clientError);
         return failure("No pudimos crear el cliente. Revisa la base de datos e intenta de nuevo.");
       }
 
       clientId = client.id;
     }
 
-    const { data: generation, error } = await supabase
-      .from("generations")
-      .insert({
-        business_id: businessUser.business_id,
-        end_client_id: clientId,
-        created_by: businessUser.id,
-        photo_urls: photoUrls,
-        ai_provider: analysis.provider,
-        ai_model: analysis.model,
-        image_provider: illustrations.provider,
-        tokens_used: analysis.inputTokens + analysis.outputTokens,
-        cost_usd: analysis.costUsd,
-        report_json: analysis.report,
-        illustration_urls: illustrationUrls,
-        status: "done"
-      })
-      .select("id")
-      .single();
+    const photoDataUrls = await Promise.all(photos.map(fileToDataUrl));
+    const imageDataUrl = photoDataUrls[0];
+    const analysis = await analyzeFace({ imageDataUrl, locale });
+    const illustrations = await generateStyleIllustrations({
+      report: analysis.report,
+      locale,
+      referenceImageUrls: photoDataUrls
+    });
 
-    if (error || !generation) {
-      return failure(`No pudimos crear el informe: ${error?.message || "error desconocido"}.`);
-    }
-
-    await Promise.all([
-      supabase
-        .from("businesses")
-        .update({ credits_remaining: Math.max(0, business.credits_remaining - 1) })
-        .eq("id", businessUser.business_id),
-      supabase.from("credit_transactions").insert({
-        business_id: businessUser.business_id,
-        credits_delta: -1,
-        type: "generation_use",
-        note: "Credit consumed by report generation"
-      }),
-      supabase.from("ai_logs").insert({
-        business_id: businessUser.business_id,
-        generation_id: generation.id,
-        provider: analysis.provider,
-        model: analysis.model,
-        request_type: "visagism_analysis",
-        input_tokens: analysis.inputTokens,
-        output_tokens: analysis.outputTokens,
-        cost_usd: analysis.costUsd,
-        status: "done"
-      })
+    const [photoUrls, illustrationUrls] = await Promise.all([
+      Promise.all(photos.map((file, index) => uploadClientPhoto({ businessId: businessUser.business_id, file, index }))),
+      uploadReportIllustrations({ businessId: businessUser.business_id, urls: illustrations.urls })
     ]);
 
-    return { ok: true, redirectTo: `/report/${generation.id}?generated=1` };
+    // Atomic: decrement a credit, insert the generation, log the transaction and
+    // AI usage in a single security-definer transaction. Prevents the
+    // check-then-decrement race and partial writes on failure.
+    const { data: generationId, error } = await supabase.rpc("create_generation_with_credit", {
+      p_business_id: businessUser.business_id,
+      p_end_client_id: clientId,
+      p_created_by: businessUser.id,
+      p_photo_urls: photoUrls,
+      p_report_json: analysis.report,
+      p_ai_provider: analysis.provider,
+      p_ai_model: analysis.model,
+      p_input_tokens: analysis.inputTokens,
+      p_output_tokens: analysis.outputTokens,
+      p_cost_usd: analysis.costUsd,
+      p_image_provider: illustrations.provider,
+      p_illustration_urls: illustrationUrls
+    });
+
+    if (error || !generationId) {
+      const reason = error?.message ?? "";
+
+      if (reason.includes("not enough credits")) {
+        return { ok: true, redirectTo: "/dashboard/credits?error=not_enough_credits" };
+      }
+
+      if (reason.includes("not authorized")) {
+        return failure("No tienes permiso para crear informes en este negocio.");
+      }
+
+      console.error("createReport: create_generation_with_credit failed", error);
+      return failure("No pudimos crear el informe. Intenta de nuevo.");
+    }
+
+    return { ok: true, redirectTo: `/report/${generationId}?generated=1` };
   } catch (error) {
-    return failure(error instanceof Error ? error.message : "No pudimos generar el informe.");
+    console.error("createReport failed", error);
+    return failure("No pudimos generar el informe. Intenta de nuevo.");
   }
 }
 

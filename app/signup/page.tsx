@@ -4,6 +4,7 @@ import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
 import { BrandLogo } from "@/components/brand/logo";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createBusinessAccount } from "@/app/signup/actions";
 import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import { getDictionary } from "@/lib/i18n/server";
@@ -62,6 +63,19 @@ export default function SignupPage({
               placeholder={signup.password}
               required
             />
+            <div className="flex items-start gap-3">
+              <input
+                id="terms"
+                name="terms"
+                type="checkbox"
+                required
+                value="accepted"
+                className="peer mt-0.5 h-4 w-4 shrink-0 cursor-pointer appearance-none rounded border border-gold/40 bg-noir outline-none transition checked:border-gold checked:bg-gold focus-visible:ring-2 focus-visible:ring-gold/30"
+              />
+              <Label htmlFor="terms" className="cursor-pointer">
+                {signup.terms}
+              </Label>
+            </div>
             <AuthSubmitButton idleLabel={signup.submit} pendingLabel={signup.loading} />
           </form>
 

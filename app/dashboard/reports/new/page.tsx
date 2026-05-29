@@ -1,8 +1,9 @@
-import { Camera, ImagePlus, UploadCloud, UserPlus } from "lucide-react";
+import { ImagePlus, UserPlus } from "lucide-react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { PageHeading } from "@/components/layout/page-heading";
 import { GenerateReportSubmit } from "@/components/reports/generate-report-submit";
 import { NewReportForm } from "@/components/reports/new-report-form";
+import { PhotoUploader } from "@/components/reports/photo-uploader";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { createReport } from "@/app/dashboard/reports/new/actions";
@@ -152,56 +153,7 @@ export default async function NewReportPage() {
               </div>
               <h2 className="font-display text-2xl text-cream">{copy.photos}</h2>
             </div>
-            <label className="mt-5 grid min-h-52 cursor-pointer place-items-center rounded-lg border border-dashed border-gold/35 bg-gold/10 p-6 text-center transition hover:border-gold hover:bg-gold/15">
-              <div>
-                <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-noir/70 text-gold">
-                  <UploadCloud className="h-9 w-9" />
-                </div>
-                <p className="mt-4 font-medium text-cream">{copy.uploadPhoto}</p>
-                <p className="mt-2 text-sm text-cream/58">{copy.uploadHelp}</p>
-                <input
-                  name="photos"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  multiple
-                  className="mt-5 max-w-full text-sm text-cream/72"
-                />
-              </div>
-            </label>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <label className="flex min-h-24 cursor-pointer items-center gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-4 transition hover:border-gold/35 hover:bg-gold/10">
-                <span className="grid h-11 w-11 place-items-center rounded-full bg-gold/10 text-gold">
-                  <Camera className="h-5 w-5" />
-                </span>
-                <span>
-                  <span className="block font-medium text-cream">{copy.takePhoto}</span>
-                  <span className="mt-1 block text-xs leading-5 text-cream/54">{copy.takePhotoHelp}</span>
-                </span>
-                <input
-                  name="photos"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  capture="environment"
-                  className="sr-only"
-                />
-              </label>
-              <label className="flex min-h-24 cursor-pointer items-center gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-4 transition hover:border-gold/35 hover:bg-gold/10">
-                <span className="grid h-11 w-11 place-items-center rounded-full bg-gold/10 text-gold">
-                  <ImagePlus className="h-5 w-5" />
-                </span>
-                <span>
-                  <span className="block font-medium text-cream">{copy.uploadPhoto}</span>
-                  <span className="mt-1 block text-xs leading-5 text-cream/54">{copy.galleryHelp}</span>
-                </span>
-                <input
-                  name="photos"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  multiple
-                  className="sr-only"
-                />
-              </label>
-            </div>
+            <PhotoUploader locale={locale} />
           </Card>
         </div>
         <div className="mt-6 flex justify-end">

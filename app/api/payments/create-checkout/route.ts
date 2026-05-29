@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireCurrentBusinessUser } from "@/lib/auth/current-user";
 import { createCheckout } from "@/lib/payments/payment-provider";
+import { clientIdentifier, rateLimit } from "@/lib/security/rate-limit";
 
 const checkoutSchema = z.object({
   plan: z.enum(["starter", "pro", "agency", "credits_100", "credits_250"]),
@@ -11,6 +12,18 @@ const checkoutSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const limit = rateLimit(`checkout:${clientIdentifier(request.headers)}`, {
+      limit: 15,
+      windowMs: 60_000
+    });
+
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again shortly." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+      );
+    }
+
     const businessUser = await requireCurrentBusinessUser();
     const body = await request.json();
     const parsed = checkoutSchema.safeParse(body);
@@ -26,7 +39,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(checkout);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to create checkout.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("create-checkout failed", error);
+    return NextResponse.json({ error: "Unable to create checkout." }, { status: 500 });
   }
 }

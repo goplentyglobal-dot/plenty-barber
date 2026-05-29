@@ -5,7 +5,6 @@ Planned route handlers:
 - `POST /api/reports/create`
 - `GET /api/reports/[id]`
 - `GET /api/reports`
-- `POST /api/ai/analyze-face`
 - `POST /api/ai/generate-illustrations`
 - `POST /api/pdf/generate`
 - `GET /api/pdf/generate?reportId=...`
@@ -24,9 +23,13 @@ Planned route handlers:
 All mutating endpoints must validate input with Zod and enforce business access
 server-side.
 
-`/api/ai/analyze-face` is server-side only and accepts a data URL image plus an
-optional provider. It returns validated report JSON and usage metadata. Private
-provider keys must remain in `.env.local` or deployment environment variables.
+Face analysis runs inside the report-creation server action (not a standalone
+route): the action calls the server-side AI adapter and persists results through
+the `create_generation_with_credit` transactional function. Private provider
+keys must remain in `.env.local` or deployment environment variables.
+
+`/api/ai/generate-illustrations` is server-side only, rate-limited, validates
+its input with Zod and enforces business ownership of the target report.
 
 Payments use a provider abstraction. `PAYMENT_PROVIDER` can be `wompi`,
 `mercadopago`, `stripe`, `payu` or `demo`.

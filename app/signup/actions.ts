@@ -1,7 +1,9 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { clientIdentifier, rateLimit } from "@/lib/security/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -9,15 +11,25 @@ const signupSchema = z.object({
   business_name: z.string().trim().min(2, "Business name is required.").max(120),
   full_name: z.string().trim().min(2, "Full name is required.").max(120),
   email: z.string().trim().email("Enter a valid email."),
-  password: z.string().min(8, "Password must be at least 8 characters.")
+  password: z.string().min(8, "Password must be at least 8 characters."),
+  terms: z.literal("accepted", {
+    errorMap: () => ({ message: "You must accept the Terms & Conditions." })
+  })
 });
 
 export async function createBusinessAccount(formData: FormData) {
+  const limit = rateLimit(`signup:${clientIdentifier(headers())}`, { limit: 5, windowMs: 60_000 });
+
+  if (!limit.allowed) {
+    redirect(`/signup?error=${encodeURIComponent("Demasiados intentos. Intenta de nuevo en un minuto.")}`);
+  }
+
   const parsed = signupSchema.safeParse({
     business_name: formData.get("business_name"),
     full_name: formData.get("full_name"),
     email: formData.get("email"),
-    password: formData.get("password")
+    password: formData.get("password"),
+    terms: formData.get("terms")
   });
 
   if (!parsed.success) {
@@ -36,7 +48,8 @@ export async function createBusinessAccount(formData: FormData) {
   });
 
   if (authError || !authData.user) {
-    redirect(`/signup?error=${encodeURIComponent(authError?.message || "Unable to create user.")}`);
+    console.error("signup: createUser failed", authError);
+    redirect(`/signup?error=${encodeURIComponent("No pudimos crear la cuenta. Verifica el correo e intenta de nuevo.")}`);
   }
 
   const { data: business, error: businessError } = await supabase

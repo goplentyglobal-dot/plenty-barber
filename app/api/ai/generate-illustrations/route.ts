@@ -6,6 +6,7 @@ import { generateStyleIllustrations } from "@/lib/ai/illustrations/generate";
 import { getReportForBusiness, updateReportIllustrations } from "@/lib/database/reports";
 import { getLocale } from "@/lib/i18n/server";
 import { uploadReportIllustrations } from "@/lib/storage/report-assets";
+import { clientIdentifier, rateLimit } from "@/lib/security/rate-limit";
 
 const requestSchema = z.object({
   reportId: z.string().uuid()
@@ -13,6 +14,18 @@ const requestSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const limit = rateLimit(`ai-illustrations:${clientIdentifier(request.headers)}`, {
+      limit: 10,
+      windowMs: 60_000
+    });
+
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again shortly." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+      );
+    }
+
     const businessUser = await requireCurrentBusinessUser();
     const locale = getLocale();
     const body = await request.json();
@@ -52,7 +65,7 @@ export async function POST(request: Request) {
       urls: illustrationUrls
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to generate illustrations.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("generate-illustrations failed", error);
+    return NextResponse.json({ error: "Unable to generate illustrations." }, { status: 500 });
   }
 }
